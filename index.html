@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111827">
+  <title>Quick Cart | Your Everyday Store</title>
+  <style>
+    :root{--ink:#111827;--muted:#667085;--bg:#f7f8fb;--card:#fff;--accent:#16a34a;--line:#e6e8ee}
+    *{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
+    button,input{font:inherit} button{cursor:pointer}
+    .topbar{background:#111827;color:#fff;text-align:center;padding:9px 14px;font-size:13px}
+    header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+    .nav{max-width:1120px;margin:auto;padding:16px 20px;display:flex;align-items:center;gap:18px}
+    .brand{font-size:24px;font-weight:900;letter-spacing:-1px;white-space:nowrap}.brand span{color:var(--accent)}
+    .search{flex:1;display:flex;gap:8px}.search input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;outline-color:var(--accent)}
+    .cartbtn,.primary{border:0;border-radius:12px;padding:12px 16px;background:var(--accent);color:#fff;font-weight:700}
+    .cartbtn{white-space:nowrap}.hero{max-width:1120px;margin:24px auto 18px;padding:0 20px}
+    .hero-inner{background:linear-gradient(120deg,#111827,#26384b);color:#fff;border-radius:24px;padding:36px;display:flex;align-items:center;justify-content:space-between;gap:22px;overflow:hidden}
+    .hero h1{font-size:clamp(30px,5vw,48px);line-height:1.05;margin:0 0 12px;max-width:600px;letter-spacing:-1.5px}
+    .hero p{color:#d5dbe5;line-height:1.6;max-width:540px;margin:0 0 20px}.hero-badge{font-size:76px;flex-shrink:0}
+    main{max-width:1120px;margin:0 auto;padding:0 20px 50px}
+    .section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:26px 0 16px}
+    .section-head h2{margin:0;font-size:25px}.section-head p{margin:5px 0 0;color:var(--muted);font-size:14px}
+    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+    .product{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+    .product img{width:100%;aspect-ratio:1/1;object-fit:cover;background:#e9edf1}
+    .product-body{padding:14px;display:flex;flex-direction:column;gap:9px;flex:1}
+    .product h3{margin:0;font-size:16px}.desc{color:var(--muted);font-size:13px;line-height:1.45;min-height:35px}
+    .price-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto}.price{font-size:19px;font-weight:800}
+    .add{border:0;background:#e9f8ee;color:#137333;padding:10px 12px;border-radius:10px;font-weight:700}
+    .empty{background:#fff;border:1px dashed #c8ced8;padding:28px;border-radius:16px;text-align:center;color:var(--muted)}
+    .cart-panel{position:fixed;inset:0;z-index:10;display:none;background:#0008;justify-content:flex-end}.cart-panel.open{display:flex}
+    .drawer{background:#fff;width:min(440px,100%);height:100%;padding:22px;display:flex;flex-direction:column;box-shadow:-10px 0 30px #0002}
+    .drawer-head{display:flex;justify-content:space-between;align-items:center}.drawer h2{margin:0}.close{border:0;background:#f0f2f5;border-radius:10px;padding:9px 12px}
+    #cartItems{overflow:auto;flex:1;margin:18px 0}.cart-item{display:grid;grid-template-columns:1fr auto;gap:10px;border-bottom:1px solid var(--line);padding:14px 0}
+    .qty{display:flex;align-items:center;gap:9px;margin-top:8px}.qty button{border:1px solid var(--line);background:#fff;border-radius:7px;width:28px;height:28px}
+    .cart-total{display:flex;justify-content:space-between;font-size:20px;font-weight:800;padding:16px 0;border-top:1px solid var(--line)}
+    .checkout-form{display:grid;gap:10px}.checkout-form input,.checkout-form textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;resize:vertical}
+    .small{font-size:12px;color:var(--muted);line-height:1.5}.footer{background:#111827;color:#d1d5db;text-align:center;padding:24px 20px;font-size:13px}.footer strong{color:#fff}
+    .notice{display:none;background:#fff7db;color:#694d00;padding:12px 14px;border-radius:10px;font-size:13px;margin:0 0 14px}
+    @media(max-width:850px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-badge{font-size:56px}.hero-inner{padding:28px}}
+    @media(max-width:520px){.nav{flex-wrap:wrap;padding:13px 14px;gap:12px}.brand{font-size:22px}.search{order:3;flex-basis:100%}.cartbtn{margin-left:auto}.hero,main{padding-left:14px;padding-right:14px}.hero-inner{padding:24px}.hero-badge{display:none}.grid{gap:10px}.product-body{padding:11px}.price-row{align-items:flex-start;flex-direction:column}.add{width:100%}.section-head h2{font-size:22px}}
+  </style>
+</head>
+<body>
+  <div class="topbar">Welcome to Quick Cart — simple shopping, made easy</div>
+  <header>
+    <div class="nav">
+      <div class="brand">Quick<span>Cart</span></div>
+      <div class="search"><input id="searchInput" type="search" placeholder="Search products..." aria-label="Search products"></div>
+      <button class="cartbtn" id="openCart">🛒 Cart (<span id="cartCount">0</span>)</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div>
+        <h1>Find your next favourite thing.</h1>
+        <p>Discover useful everyday products at your own pace. Add items to your cart and send your order request directly to our store.</p>
+        <button class="primary" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">Shop products ↓</button>
+      </div>
+      <div class="hero-badge" aria-hidden="true">🛍️</div>
+    </div>
+  </section>
+
+  <main>
+    <div class="section-head">
+      <div><h2 id="productHeading">Featured products</h2><p>Demo products — replace these with your real items and prices.</p></div>
+    </div>
+    <div id="products" class="grid"></div>
+    <p class="small" style="margin-top:18px">Demo store notice: product photos, prices, stock and delivery details must be checked and updated by the store owner before taking real orders.</p>
+  </main>
+
+  <footer class="footer"><strong>Quick Cart</strong><br>Everyday finds, easy ordering.<br><span>Contact the store to confirm availability, delivery and final price.</span></footer>
+
+  <div class="cart-panel" id="cartPanel" role="dialog" aria-modal="true" aria-label="Shopping cart">
+    <div class="drawer">
+      <div class="drawer-head"><h2>Your cart</h2><button class="close" id="closeCart">✕ Close</button></div>
+      <div id="cartItems"></div>
+      <div class="cart-total"><span>Total</span><span id="cartTotal">₹0</span></div>
+      <div class="checkout-form">
+        <input id="customerName" placeholder="Your name" autocomplete="name">
+        <input id="customerPhone" placeholder="Your phone number" inputmode="tel" autocomplete="tel">
+        <textarea id="customerAddress" rows="2" placeholder="Delivery address (if needed)"></textarea>
+        <div id="checkoutNotice" class="notice"></div>
+        <button class="primary" id="checkoutBtn">Send order request on WhatsApp</button>
+        <p class="small">This demo does not take online payments or automatically save orders. WhatsApp opens with an order message for you to review and send. Never enter card details here.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // QUICK CART SETTINGS:
+    // Replace 91XXXXXXXXXX with your store WhatsApp number, including country code.
+    // Example format for India: 919876543210 (digits only, no + or spaces).
+    const STORE_WHATSAPP = "91XXXXXXXXXX";
+
+    // Replace demo products with your own products, prices and image URLs.
+    // Use photos you own or have permission to use.
+    const products = [
+      {id:1,name:"Everyday Backpack",price:799,description:"A practical bag for everyday use.",image:"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=700&q=80"},
+      {id:2,name:"Classic Watch",price:1199,description:"A simple style for daily wear.",image:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=700&q=80"},
+      {id:3,name:"Wireless Headphones",price:1499,description:"Enjoy music and videos comfortably.",image:"https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=700&q=80"},
+      {id:4,name:"Everyday Sneakers",price:999,description:"Comfortable footwear for casual days.",image:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=700&q=80"}
+    ];
+
+    let cart = {};
+    const rupees = n => new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}).format(n);
+    const productsEl = document.getElementById("products");
+
+    function renderProducts(){
+      const query = document.getElementById("searchInput").value.trim().toLowerCase();
+      const visible = products.filter(p => (p.name+" "+p.description).toLowerCase().includes(query));
+      productsEl.innerHTML = "";
+      if(!visible.length){ productsEl.innerHTML='<div class="empty" style="grid-column:1/-1">No products found. Try another search.</div>'; return; }
+      visible.forEach(p=>{
+        const card=document.createElement("article"); card.className="product";
+        card.innerHTML=`<img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='https://placehold.co/600x600?text=Product'">
+          <div class="product-body"><h3>${p.name}</h3><div class="desc">${p.description}</div>
+          <div class="price-row"><span class="price">${rupees(p.price)}</span><button class="add" data-add="${p.id}">+ Add to cart</button></div></div>`;
+        productsEl.appendChild(card);
+      });
+    }
+    function cartCount(){return Object.values(cart).reduce((sum,n)=>sum+n,0)}
+    function renderCart(){
+      document.getElementById("cartCount").textContent=cartCount();
+      const el=document.getElementById("cartItems"); el.innerHTML="";
+      const selected=products.filter(p=>cart[p.id]);
+      if(!selected.length) el.innerHTML='<div class="empty">Your cart is empty.<br><br>Add a product to get started.</div>';
+      selected.forEach(p=>{
+        const row=document.createElement("div");row.className="cart-item";
+        row.innerHTML=`<div><strong>${p.name}</strong><div class="small">${rupees(p.price)} each</div>
+          <div class="qty"><button data-minus="${p.id}" aria-label="Decrease quantity">−</button><span>${cart[p.id]}</span><button data-plus="${p.id}" aria-label="Increase quantity">+</button></div></div>
+          <strong>${rupees(p.price*cart[p.id])}</strong>`;
+        el.appendChild(row);
+      });
+      document.getElementById("cartTotal").textContent=rupees(selected.reduce((sum,p)=>sum+p.price*cart[p.id],0));
+    }
+    productsEl.addEventListener("click",e=>{const b=e.target.closest("[data-add]");if(!b)return;const id=Number(b.dataset.add);cart[id]=(cart[id]||0)+1;renderCart();b.textContent="Added ✓";setTimeout(()=>{if(b.isConnected)b.textContent="+ Add to cart"},900)});
+    document.getElementById("cartItems").addEventListener("click",e=>{
+      const plus=e.target.closest("[data-plus]"),minus=e.target.closest("[data-minus]");
+      if(plus){const id=Number(plus.dataset.plus);cart[id]=(cart[id]||0)+1}
+      if(minus){const id=Number(minus.dataset.minus);cart[id]=(cart[id]||0)-1;if(cart[id]<=0)delete cart[id]}
+      renderCart();
+    });
+    document.getElementById("searchInput").addEventListener("input",renderProducts);
+    document.getElementById("openCart").addEventListener("click",()=>document.getElementById("cartPanel").classList.add("open"));
+    document.getElementById("closeCart").addEventListener("click",()=>document.getElementById("cartPanel").classList.remove("open"));
+    document.getElementById("cartPanel").addEventListener("click",e=>{if(e.target.id==="cartPanel")e.currentTarget.classList.remove("open")});
+    document.getElementById("checkoutBtn").addEventListener("click",()=>{
+      const notice=document.getElementById("checkoutNotice");
+      const selected=products.filter(p=>cart[p.id]);
+      if(!selected.length){notice.textContent="Please add at least one product to your cart.";notice.style.display="block";return}
+      if(!/^\d{10,15}$/.test(STORE_WHATSAPP)){notice.textContent="Store setup needed: open index.html and replace STORE_WHATSAPP with your store's WhatsApp number, including country code. Example format: 919876543210.";notice.style.display="block";return}
+      const name=document.getElementById("customerName").value.trim();
+      const phone=document.getElementById("customerPhone").value.trim();
+      const address=document.getElementById("customerAddress").value.trim();
+      if(!name||!phone){notice.textContent="Please enter your name and phone number.";notice.style.display="block";return}
+      const lines=selected.map(p=>`• ${p.name} x ${cart[p.id]} = ${rupees(p.price*cart[p.id])}`);
+      const total=selected.reduce((sum,p)=>sum+p.price*cart[p.id],0);
+      const message=`Hello Quick Cart! I would like to request an order:\n\n${lines.join("\n")}\n\nEstimated total: ${rupees(total)}\nCustomer: ${name}\nPhone: ${phone}\nAddress: ${address||"Will confirm with store"}\n\nPlease confirm availability, delivery fee and final amount.`;
+      window.open(`https://wa.me/${STORE_WHATSAPP}?text=${encodeURIComponent(message)}`,"_blank","noopener");
+      notice.textContent="WhatsApp opened. Review the order details and press Send there to submit your request.";notice.style.display="block";
+    });
+    renderProducts();renderCart();
+  </script>
+</body>
+</html>
